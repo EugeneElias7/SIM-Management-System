@@ -31,25 +31,24 @@ export function Sidebar() {
   const [logoError, setLogoError] = React.useState(false);
   return (
     <aside className="hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-navy-900 text-white lg:flex">
-      <div className="flex h-16 items-center gap-3 px-5">
+      <div className="flex flex-col items-start gap-2 px-5 py-4">
         {!logoError ? (
-          <div className="flex h-9 items-center rounded-lg bg-white px-2">
+          <div className="inline-flex items-center rounded-2xl bg-white px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
             <img
               src="/assets/san-solutions-logo.webp"
               alt="San Solution"
-              className="h-7 w-auto object-contain"
+              className="h-12 w-auto object-contain"
               onError={() => setLogoError(true)}
             />
           </div>
         ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-navy-900 font-extrabold tracking-tight">
-            SAN
+          <div className="inline-flex items-center rounded-2xl bg-white px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#0B3A70] text-white text-xl font-extrabold">
+              SAN
+            </div>
           </div>
         )}
-        <div className="min-w-0">
-          <p className="text-sm font-bold tracking-wide">SAN SOLUTION</p>
-          <p className="text-[11px] text-navy-200">SIM Management</p>
-        </div>
+        <p className="text-[11px] font-medium text-navy-200">SIM Management</p>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navItems.map((item) => {
