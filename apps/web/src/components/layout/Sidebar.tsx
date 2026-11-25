@@ -29,7 +29,7 @@ const navItems = [
 export function Sidebar() {
   const location = useLocation();
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-white/10 bg-navy-900 text-white lg:flex">
+    <aside className="hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-navy-900 text-white lg:flex">
       <div className="flex h-16 items-center gap-3 px-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-navy-900 font-extrabold tracking-tight">
           SAN

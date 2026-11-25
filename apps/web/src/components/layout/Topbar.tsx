@@ -37,7 +37,7 @@ export function Topbar() {
   const failed = statsQuery.data?.failed ?? 0;
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-ink-200 bg-white/80 px-6 backdrop-blur">
+    <header className="z-30 flex h-16 shrink-0 items-center justify-between border-b border-ink-200 bg-white/80 px-6 backdrop-blur">
       <div className="min-w-0">
         <h2 className="text-base font-semibold text-ink-900">{meta.title}</h2>
         {meta.subtitle && <p className="text-xs text-ink-500">{meta.subtitle}</p>}
