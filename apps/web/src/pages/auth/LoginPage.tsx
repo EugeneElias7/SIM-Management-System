@@ -68,22 +68,22 @@ export function LoginPage() {
       <div className="relative z-10 flex min-h-screen flex-col px-5 py-6 sm:px-8 md:px-12 lg:px-16">
         <div ref={logoRef} className="flex items-center">
           {!logoError ? (
-            <div className="inline-flex items-center rounded-2xl bg-white/20 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl border border-white/30">
+            <div className="inline-flex items-center rounded-2xl bg-white px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
               <img
                 src="/assets/san-solutions-logo.webp"
                 alt="San Solution"
-                className="h-9 w-auto object-contain"
+                className="h-12 w-auto object-contain"
                 onError={() => setLogoError(true)}
               />
             </div>
           ) : (
-            <div className="inline-flex items-center gap-3 rounded-2xl bg-white/20 px-4 py-3 backdrop-blur-xl border border-white/30">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#0B3A70] text-lg font-extrabold">
+            <div className="inline-flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#0B3A70] text-white text-xl font-extrabold">
                 SAN
               </div>
-              <div className="text-white">
+              <div className="text-[#172B42]">
                 <p className="text-sm font-bold tracking-wide">SAN SOLUTION</p>
-                <p className="text-[11px] text-white/70">SIM Management</p>
+                <p className="text-[11px] text-[#64748B]">SIM Management</p>
               </div>
             </div>
           )}
