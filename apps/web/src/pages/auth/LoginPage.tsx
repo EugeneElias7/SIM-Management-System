@@ -68,35 +68,22 @@ export function LoginPage() {
       <div className="relative z-10 flex min-h-screen flex-col px-5 py-6 sm:px-8 md:px-12 lg:px-16">
         <div ref={logoRef} className="flex items-center">
           {!logoError ? (
-            <div className="relative inline-flex items-center rounded-xl bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
-              {/* SIM-style gold contact pins */}
-              <span className="absolute -left-1.5 top-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -left-1.5 top-1/2 h-2.5 w-1.5 -translate-y-1/2 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -left-1.5 bottom-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -right-1.5 top-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -right-1.5 top-1/2 h-2.5 w-1.5 -translate-y-1/2 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -right-1.5 bottom-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute left-3 -top-1.5 h-1.5 w-2.5 rounded-sm bg-gradient-to-r from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute right-3 -top-1.5 h-1.5 w-2.5 rounded-sm bg-gradient-to-r from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute left-3 -bottom-1.5 h-1.5 w-2.5 rounded-sm bg-gradient-to-r from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute right-3 -bottom-1.5 h-1.5 w-2.5 rounded-sm bg-gradient-to-r from-[#f7d97a] to-[#b8921f]" />
+            <div className="inline-flex items-center rounded-2xl bg-white px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
               <img
                 src="/assets/san-solutions-logo.webp"
                 alt="San Solution"
-                className="relative h-12 w-auto object-contain"
+                className="h-12 w-auto object-contain"
                 onError={() => setLogoError(true)}
               />
             </div>
           ) : (
-            <div className="relative inline-flex items-center rounded-xl bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.3)]">
-              <span className="absolute -left-1.5 top-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -left-1.5 top-1/2 h-2.5 w-1.5 -translate-y-1/2 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -left-1.5 bottom-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -right-1.5 top-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -right-1.5 top-1/2 h-2.5 w-1.5 -translate-y-1/2 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
-              <span className="absolute -right-1.5 bottom-3 h-2.5 w-1.5 rounded-sm bg-gradient-to-b from-[#f7d97a] to-[#b8921f]" />
+            <div className="inline-flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.25)]">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#0B3A70] text-white text-xl font-extrabold">
                 SAN
+              </div>
+              <div className="text-[#172B42]">
+                <p className="text-sm font-bold tracking-wide">SAN SOLUTION</p>
+                <p className="text-[11px] text-[#64748B]">SIM Management</p>
               </div>
             </div>
           )}
