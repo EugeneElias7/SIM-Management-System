@@ -1,9 +1,11 @@
+import '@fontsource/playfair-display/700.css';
 import * as React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import gsap from 'gsap';
 import { loginSchema, type LoginInput } from '@san/shared';
 import { useAuth } from '@/auth/auth-context';
 import { ApiError } from '@/lib/api';
@@ -16,6 +18,10 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = React.useState(false);
   const [logoError, setLogoError] = React.useState(false);
+  const logoRef = React.useRef<HTMLDivElement>(null);
+  const headingRef = React.useRef<HTMLDivElement>(null);
+  const formRef = React.useRef<HTMLDivElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -26,6 +32,33 @@ export function LoginPage() {
   });
   const [serverError, setServerError] = React.useState<string | null>(null);
 
+  React.useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (logoRef.current) {
+        gsap.fromTo(
+          logoRef.current,
+          { opacity: 0, y: -18 },
+          { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' },
+        );
+      }
+      if (headingRef.current) {
+        gsap.fromTo(
+          headingRef.current,
+          { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, duration: 1.1, delay: 0.25, ease: 'power3.out' },
+        );
+      }
+      if (formRef.current) {
+        gsap.fromTo(
+          formRef.current,
+          { opacity: 0, x: 48 },
+          { opacity: 1, x: 0, duration: 1.1, delay: 0.45, ease: 'power3.out' },
+        );
+      }
+    });
+    return () => ctx.revert();
+  }, []);
+
   const mutation = useMutation({
     mutationFn: async (values: LoginInput) => login(values.email, values.password, values.rememberMe),
     onSuccess: () => navigate('/', { replace: true }),
@@ -35,58 +68,76 @@ export function LoginPage() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      {/* Left panel — brand + industrial background */}
-      <section
-        className="relative flex min-h-[42vh] flex-1 flex-col justify-between overflow-hidden bg-[#0B1F3B] md:min-h-screen md:w-[60%]"
-        style={{
-          backgroundImage:
-            "linear-gradient(180deg, rgba(11,28,58,0.55) 0%, rgba(11,28,58,0.35) 45%, rgba(11,28,58,0.75) 100%), url('/images/san-solution-login-bg.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        <div className="relative z-10 px-10 pt-10 md:px-12 md:pt-12">
-          {!logoError ? (
-            <img
-              src="/images/san-solution-logo.png"
-              alt="San Solution"
-              height={44}
-              className="h-11 w-auto object-contain"
-              onError={() => setLogoError(true)}
-            />
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white text-[#0B3A70] text-lg font-extrabold">
-                SAN
-              </div>
-              <div className="text-white">
-                <p className="text-sm font-bold tracking-wide">SAN SOLUTION</p>
-                <p className="text-[11px] text-white/70">SIM Management</p>
-              </div>
+    <div className="relative min-h-screen overflow-hidden bg-[#0B1F3B]">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/background.png')" }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 bg-gradient-to-r from-[#050d1f]/85 via-[#050d1f]/55 to-[#050d1f]/30"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-[#050d1f]/70 via-transparent to-transparent"
+        aria-hidden="true"
+      />
+
+      <div ref={logoRef} className="absolute left-8 top-8 z-20 md:left-12 md:top-10">
+        {!logoError ? (
+          <img
+            src="/san-solution-logo.webp"
+            alt="San Solution"
+            className="h-11 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+            onError={() => setLogoError(true)}
+          />
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/95 text-[#0B3A70] text-lg font-extrabold">
+              SAN
             </div>
-          )}
-        </div>
+            <div className="text-white">
+              <p className="text-sm font-bold tracking-wide">SAN SOLUTION</p>
+              <p className="text-[11px] text-white/70">SIM Management</p>
+            </div>
+          </div>
+        )}
+      </div>
 
-        <div className="relative z-10 max-w-xl px-10 pb-12 md:px-12 md:pb-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/80">
-            SIM MANAGEMENT SYSTEM
-          </p>
-          <h1 className="mt-3 text-[36px] font-semibold leading-tight text-white md:text-[40px]">
-            Monitor. Manage. Renew.
-          </h1>
-          <p className="mt-4 text-base text-white/85 md:text-lg">
-            All your machinery SIMs. One centralized platform.
-          </p>
-        </div>
-      </section>
+      <div
+        ref={headingRef}
+        className="pointer-events-none absolute left-8 top-1/2 z-10 max-w-xl -translate-y-1/2 md:left-12 lg:left-16"
+      >
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/75">
+          SIM MANAGEMENT SYSTEM
+        </p>
+        <h1
+          className="mt-4 text-[40px] font-bold leading-[1.05] text-white md:text-[52px] lg:text-[60px]"
+          style={{ fontFamily: '"Playfair Display", "Times New Roman", serif' }}
+        >
+          Monitor.
+          <br />
+          Manage.
+          <br />
+          Renew.
+        </h1>
+        <p className="mt-5 max-w-md text-base text-white/80 md:text-lg">
+          All your machinery SIMs. One centralized platform.
+        </p>
+      </div>
 
-      {/* Right panel — login form */}
-      <section className="flex flex-1 items-center justify-center bg-[#F4F7FB] px-6 py-10 md:w-[40%] md:px-10">
-        <div className="w-full max-w-[400px] rounded-2xl bg-white p-9 shadow-[0_12px_40px_rgba(15,23,42,0.08)] md:p-10">
+      <div
+        ref={formRef}
+        className="relative z-20 flex min-h-screen items-center justify-center px-6 py-10 md:justify-end md:px-12 lg:px-20"
+      >
+        <div className="w-full max-w-[400px] rounded-2xl bg-white/95 p-9 shadow-[0_24px_60px_rgba(5,13,31,0.35)] backdrop-blur-md md:p-10">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-[#172B42]">Welcome Back</h2>
+            <h2
+              className="text-2xl font-bold text-[#172B42]"
+              style={{ fontFamily: '"Playfair Display", "Times New Roman", serif' }}
+            >
+              Welcome Back
+            </h2>
             <p className="mt-1 text-sm text-[#64748B]">Sign in to your account to continue.</p>
           </div>
 
@@ -105,7 +156,7 @@ export function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                className="mt-1.5 border-[#DCE4ED] text-[#172B42] placeholder:text-[#94A3B8] focus:border-[#0B3A70] focus:ring-[#0B3A70]/20"
+                className="mt-1.5 border-[#DCE4ED] bg-white text-[#172B42] placeholder:text-[#94A3B8] focus:border-[#0B3A70] focus:ring-[#0B3A70]/20"
                 {...register('email')}
               />
               {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
@@ -120,7 +171,7 @@ export function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className="border-[#DCE4ED] pr-10 text-[#172B42] placeholder:text-[#94A3B8] focus:border-[#0B3A70] focus:ring-[#0B3A70]/20"
+                  className="border-[#DCE4ED] bg-white pr-10 text-[#172B42] placeholder:text-[#94A3B8] focus:border-[#0B3A70] focus:ring-[#0B3A70]/20"
                   {...register('password')}
                 />
                 <button
@@ -168,7 +219,7 @@ export function LoginPage() {
             © 2026 San Solution. All rights reserved.
           </p>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
