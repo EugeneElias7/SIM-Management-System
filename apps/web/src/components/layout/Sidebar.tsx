@@ -28,12 +28,24 @@ const navItems = [
 
 export function Sidebar() {
   const location = useLocation();
+  const [logoError, setLogoError] = React.useState(false);
   return (
     <aside className="hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-navy-900 text-white lg:flex">
       <div className="flex h-16 items-center gap-3 px-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-navy-900 font-extrabold tracking-tight">
-          SAN
-        </div>
+        {!logoError ? (
+          <div className="flex h-9 items-center rounded-lg bg-white px-2">
+            <img
+              src="/assets/san-solutions-logo.webp"
+              alt="San Solution"
+              className="h-7 w-auto object-contain"
+              onError={() => setLogoError(true)}
+            />
+          </div>
+        ) : (
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-navy-900 font-extrabold tracking-tight">
+            SAN
+          </div>
+        )}
         <div className="min-w-0">
           <p className="text-sm font-bold tracking-wide">SAN SOLUTION</p>
           <p className="text-[11px] text-navy-200">SIM Management</p>
