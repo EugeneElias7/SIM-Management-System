@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+*.tsbuildinfo
+apps/web/.vite/
+coverage/
+test-results/
+playwright-report/
+blob-report/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.pem
+*.key
+*.p12
+
+# Local data
+pgdata/
+data/
+uploads/
+logs/
+*.log
+
+# Prisma local artifacts
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Test artifacts
+apps/api/src/tests/tmp/

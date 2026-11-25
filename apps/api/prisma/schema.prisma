@@ -1,0 +1,364 @@
+// SAN SOLUTION — SIM Management System
+// PostgreSQL schema. All primary keys are UUIDs. Business records are archived,
+// never hard-deleted by normal application operations.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NetworkProvider {
+  AIRTEL
+  JIO
+  VI
+  BSNL
+  OTHER
+}
+
+enum OperationalStatus {
+  IN_STOCK
+  ACTIVE
+  SUSPENDED
+  FAULTY
+  DECOMMISSIONED
+}
+
+enum MachineStatus {
+  OPERATIONAL
+  UNDER_MAINTENANCE
+  OUT_OF_SERVICE
+  DECOMMISSIONED
+}
+
+enum ReminderType {
+  BEFORE_EXPIRY
+  ON_EXPIRY
+  POST_EXPIRY
+}
+
+enum NotificationStatus {
+  PENDING
+  QUEUED
+  SENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum NotificationChannel {
+  EMAIL
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  permissions String[] @default([])
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model User {
+  id                 String               @id @default(uuid()) @db.Uuid
+  email              String               @unique
+  passwordHash       String
+  firstName          String
+  lastName           String
+  roleId             String               @db.Uuid
+  role               Role                 @relation(fields: [roleId], references: [id])
+  isActive           Boolean              @default(true)
+  lastLoginAt        DateTime?
+  passwordChangedAt  DateTime?
+  mustChangePassword Boolean              @default(false)
+  archivedAt         DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  sessions           Session[]
+  passwordResetTokens PasswordResetToken[]
+  activityLogs       ActivityLog[]
+  simsCreated        Sim[]                @relation("SimCreatedBy")
+  simsUpdated        Sim[]                @relation("SimUpdatedBy")
+  assignmentsCreated SimAssignment[]      @relation("AssignmentAssignedBy")
+  assignmentsClosed  SimAssignment[]      @relation("AssignmentUnassignedBy")
+  renewalsRecorded   SimRenewal[]         @relation("RenewalRecordedBy")
+
+  @@index([roleId])
+  @@map("users")
+}
+
+model Session {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash    String    @unique
+  rememberMe   Boolean   @default(false)
+  ipAddress    String?
+  userAgent    String?
+  expiresAt    DateTime
+  lastUsedAt   DateTime  @default(now())
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model Company {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String           @unique
+  address     String?
+  city        String?
+  state       String?
+  postalCode  String?
+  country     String           @default("India")
+  phone       String?
+  email       String?
+  website     String?
+  notes       String?
+  isActive    Boolean          @default(true)
+  archivedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  contacts    Contact[]
+  sims        Sim[]
+  machines    Machine[]
+  assignments SimAssignment[]
+  renewals    SimRenewal[]
+  activityLogs ActivityLog[]
+
+  @@index([name])
+  @@index([archivedAt])
+  @@map("companies")
+}
+
+model Contact {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  fullName    String
+  designation String?
+  email       String?
+  phone       String?
+  isPrimary   Boolean  @default(false)
+  notes       String?
+  archivedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  sims        Sim[]
+  assignments SimAssignment[]
+
+  @@index([companyId])
+  @@map("contacts")
+}
+
+model Machine {
+  id               String        @id @default(uuid()) @db.Uuid
+  name             String
+  model            String?
+  serialNumber     String        @unique
+  companyId        String        @db.Uuid
+  company          Company       @relation(fields: [companyId], references: [id])
+  installationDate DateTime?     @db.Date
+  status           MachineStatus @default(OPERATIONAL)
+  notes            String?
+  archivedAt       DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  sims             Sim[]
+  assignments      SimAssignment[]
+
+  @@index([companyId])
+  @@index([serialNumber])
+  @@map("machines")
+}
+
+model Sim {
+  id                String            @id @default(uuid()) @db.Uuid
+  internalId        String            @unique
+  mobileNumber      String            @unique
+  iccid             String            @unique
+  imsi              String?           @unique
+  provider          NetworkProvider
+  activationDate    DateTime?         @db.Date
+  expiryDate        DateTime?         @db.Date
+  operationalStatus OperationalStatus @default(IN_STOCK)
+  companyId         String?           @db.Uuid
+  company           Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  machineId         String?           @unique @db.Uuid
+  machine           Machine?          @relation(fields: [machineId], references: [id], onDelete: SetNull)
+  contactId         String?           @db.Uuid
+  contact           Contact?          @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  notes             String?
+  lastRenewedAt     DateTime?
+  archivedAt        DateTime?
+  createdById       String?           @db.Uuid
+  createdBy         User?             @relation("SimCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById       String?           @db.Uuid
+  updatedBy         User?             @relation("SimUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  assignments       SimAssignment[]
+  renewals          SimRenewal[]
+  notifications     Notification[]
+  activityLogs      ActivityLog[]
+
+  @@index([companyId])
+  @@index([provider])
+  @@index([operationalStatus])
+  @@index([expiryDate])
+  @@index([archivedAt])
+  @@map("sims")
+}
+
+model SimAssignment {
+  id             String    @id @default(uuid()) @db.Uuid
+  simId          String    @db.Uuid
+  sim            Sim       @relation(fields: [simId], references: [id], onDelete: Cascade)
+  companyId      String    @db.Uuid
+  company        Company   @relation(fields: [companyId], references: [id])
+  machineId      String?   @db.Uuid
+  machine        Machine?  @relation(fields: [machineId], references: [id], onDelete: SetNull)
+  contactId      String?   @db.Uuid
+  contact        Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  assignedAt     DateTime  @default(now())
+  unassignedAt   DateTime?
+  assignedById   String?   @db.Uuid
+  assignedBy     User?     @relation("AssignmentAssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+  unassignedById String?   @db.Uuid
+  unassignedBy   User?     @relation("AssignmentUnassignedBy", fields: [unassignedById], references: [id], onDelete: SetNull)
+  notes          String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  @@index([simId, isActive])
+  @@index([companyId])
+  @@index([machineId])
+  @@map("sim_assignments")
+}
+
+model SimRenewal {
+  id                String    @id @default(uuid()) @db.Uuid
+  simId             String    @db.Uuid
+  sim               Sim       @relation(fields: [simId], references: [id], onDelete: Cascade)
+  companyId         String?   @db.Uuid
+  company           Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  previousExpiryDate DateTime? @db.Date
+  newExpiryDate     DateTime  @db.Date
+  renewalDate       DateTime  @db.Date
+  referenceNumber   String?
+  cost              Decimal?  @db.Decimal(12, 2)
+  notes             String?
+  renewedById       String?   @db.Uuid
+  renewedBy         User?     @relation("RenewalRecordedBy", fields: [renewedById], references: [id], onDelete: SetNull)
+  createdAt         DateTime  @default(now())
+
+  @@index([simId])
+  @@index([companyId])
+  @@index([renewalDate])
+  @@map("sim_renewals")
+}
+
+model NotificationSetting {
+  id                     String    @id @default("global")
+  enabled                Boolean   @default(true)
+  reminderDaysBefore     Int[]     @default([30, 15, 7])
+  notifyOnExpiry         Boolean   @default(true)
+  postExpiryWeekly       Boolean   @default(true)
+  postExpiryIntervalDays Int       @default(7)
+  recipients             String[]  @default([])
+  ccEmails               String[]  @default([])
+  sendHour               Int       @default(9)
+  timezone               String    @default("Asia/Kolkata")
+  lastScanAt             DateTime?
+  updatedById            String?   @db.Uuid
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@map("notification_settings")
+}
+
+model Notification {
+  id                String             @id @default(uuid()) @db.Uuid
+  simId             String?            @db.Uuid
+  sim               Sim?               @relation(fields: [simId], references: [id], onDelete: SetNull)
+  channel           NotificationChannel @default(EMAIL)
+  reminderType      ReminderType
+  reminderDays      Int
+  expiryCycle       DateTime           @db.Date
+  idempotencyKey    String             @unique
+  recipientEmail    String
+  ccEmails          String[]           @default([])
+  subject           String
+  status            NotificationStatus @default(PENDING)
+  attempts          Int                @default(0)
+  maxAttempts       Int                @default(5)
+  lastError         String?
+  providerMessageId String?
+  scheduledFor      DateTime           @default(now())
+  sentAt            DateTime?
+  nextRetryAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([status, scheduledFor])
+  @@index([simId])
+  @@index([expiryCycle])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @db.Uuid
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  companyId   String?  @db.Uuid
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  simId       String?  @db.Uuid
+  sim         Sim?     @relation(fields: [simId], references: [id], onDelete: SetNull)
+  action      String
+  entityType  String
+  entityId    String?
+  description String
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@index([companyId])
+  @@index([simId])
+  @@map("activity_logs")
+}
+
+model SystemSetting {
+  key         String   @id
+  value       Json
+  description String?
+  updatedById String?  @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}

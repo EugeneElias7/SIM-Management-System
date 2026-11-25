@@ -1,0 +1,74 @@
+import * as React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  Activity,
+  BarChart3,
+  Bell,
+  Building2,
+  ClipboardList,
+  Gauge,
+  LayoutDashboard,
+  Settings,
+  Smartphone,
+  Wrench,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const navItems = [
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard:read' },
+  { to: '/sims', label: 'SIM Inventory', icon: Smartphone, permission: 'sims:read' },
+  { to: '/companies', label: 'Companies', icon: Building2, permission: 'companies:read' },
+  { to: '/machines', label: 'Machinery', icon: Wrench, permission: 'machines:read' },
+  { to: '/expiry', label: 'Expiry & Renewals', icon: ClipboardList, permission: 'renewals:read' },
+  { to: '/notifications', label: 'Notifications', icon: Bell, permission: 'notifications:read' },
+  { to: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports:read' },
+  { to: '/activity', label: 'Activity Log', icon: Activity, permission: 'activity:read' },
+  { to: '/settings', label: 'Settings', icon: Settings, permission: 'settings:manage' },
+];
+
+export function Sidebar() {
+  const location = useLocation();
+  return (
+    <aside className="hidden w-64 shrink-0 flex-col border-r border-white/10 bg-navy-900 text-white lg:flex">
+      <div className="flex h-16 items-center gap-3 px-5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-navy-900 font-extrabold tracking-tight">
+          SAN
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold tracking-wide">SAN SOLUTION</p>
+          <p className="text-[11px] text-navy-200">SIM Management</p>
+        </div>
+      </div>
+      <nav className="flex-1 space-y-1 px-3 py-4">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active =
+            item.to === '/'
+              ? location.pathname === '/'
+              : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={cn(
+                'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                active
+                  ? 'bg-white/10 text-white shadow-sm'
+                  : 'text-navy-100 hover:bg-white/5 hover:text-white',
+              )}
+            >
+              <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-white' : 'text-navy-200')} />
+              <span className="truncate">{item.label}</span>
+              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-navy-300" />}
+            </NavLink>
+          );
+        })}
+      </nav>
+      <div className="border-t border-white/10 px-5 py-4">
+        <p className="text-[11px] text-navy-200">© {new Date().getFullYear()} SAN SOLUTION</p>
+        <p className="text-[10px] text-navy-300">v1.0.0 · Render + Supabase</p>
+      </div>
+    </aside>
+  );
+}
+export default Sidebar;

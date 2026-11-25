@@ -1,0 +1,25 @@
+# Development checklist
+
+- [x] Monorepo with npm workspaces
+- [x] Shared package (enums, dates, schemas, types)
+- [x] Prisma schema and initial migration
+- [x] Authentication and session management
+- [x] RBAC middleware and permissions
+- [x] Company CRUD, contacts and detail tabs
+- [x] SIM CRUD, assignment history, renewal history
+- [x] Machinery CRUD and SIM linkage
+- [x] Expiry scan and renewal workflows
+- [x] Notification settings, log, retries and test email
+- [x] pg-boss worker with daily schedule and catch-up
+- [x] Reports with CSV, Excel and PDF export
+- [x] SIM import (CSV/XLSX) with dry run
+- [x] Activity log
+- [x] Settings and user management
+- [x] React SPA with all required pages
+- [x] API unit and integration tests
+- [x] Playwright smoke test
+- [x] Documentation and Render blueprint
+- [ ] Production SMTP configuration
+- [ ] Playwright browser installation (`npx playwright install`)
+- [ ] First production deploy and seed
+- [ ] Restore drill from backup

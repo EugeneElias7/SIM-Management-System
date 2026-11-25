@@ -1,0 +1,34 @@
+{
+  "name": "san-solution-sim-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SAN SOLUTION - SIM Management System",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @san/api\" \"npm run dev -w @san/web\"",
+    "dev:worker": "npm run dev:worker -w @san/api",
+    "build": "npm run build -w @san/api && npm run build -w @san/web",
+    "start": "npm run start -w @san/api",
+    "worker": "npm run worker -w @san/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test -w @san/api",
+    "test:e2e": "npm run test:e2e -w @san/web",
+    "db:generate": "npm run db:generate -w @san/api",
+    "db:migrate": "npm run db:migrate -w @san/api",
+    "db:deploy": "npm run db:deploy -w @san/api",
+    "db:seed": "npm run db:seed -w @san/api",
+    "db:studio": "npm run db:studio -w @san/api",
+    "setup": "npm install && npm run db:generate && npm run db:migrate && npm run db:seed",
+    "lint": "npm run typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "typescript": "5.9.3"
+  }
+}
