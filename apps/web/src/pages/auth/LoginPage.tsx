@@ -85,12 +85,14 @@ export function LoginPage() {
 
       <div ref={logoRef} className="absolute left-8 top-8 z-20 md:left-12 md:top-10">
         {!logoError ? (
-          <img
-            src="/san-solutions-logo.webp"
-            alt="San Solution"
-            className="h-11 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
-            onError={() => setLogoError(true)}
-          />
+          <div className="inline-flex items-center rounded-2xl bg-white/15 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-lg border border-white/25">
+            <img
+              src="/san-solutions-logo.webp"
+              alt="San Solution"
+              className="h-9 w-auto object-contain"
+              onError={() => setLogoError(true)}
+            />
+          </div>
         ) : (
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-white/95 text-[#0B3A70] text-lg font-extrabold">
