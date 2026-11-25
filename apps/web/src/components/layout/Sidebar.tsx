@@ -66,7 +66,6 @@ export function Sidebar() {
       </nav>
       <div className="border-t border-white/10 px-5 py-4">
         <p className="text-[11px] text-navy-200">© {new Date().getFullYear()} SAN SOLUTION</p>
-        <p className="text-[10px] text-navy-300">v1.0.0 · Render + Supabase</p>
       </div>
     </aside>
   );
