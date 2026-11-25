@@ -71,7 +71,7 @@ export function LoginPage() {
     <div className="relative min-h-screen overflow-hidden bg-[#0B1F3B]">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/background.png')" }}
+        style={{ backgroundImage: "url('/assets/background.png')" }}
         aria-hidden="true"
       />
       <div
@@ -87,7 +87,7 @@ export function LoginPage() {
         {!logoError ? (
           <div className="inline-flex items-center rounded-2xl bg-white/15 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-lg border border-white/25">
             <img
-              src="/san-solutions-logo.webp"
+              src="/assets/san-solutions-logo.webp"
               alt="San Solution"
               className="h-9 w-auto object-contain"
               onError={() => setLogoError(true)}
