@@ -41,9 +41,20 @@
 - Premium typography, generous spacing, soft shadows, restrained blue/semantic palette.
 - Fully responsive: stacks to single column on mobile.
 
+
+### Command centre dashboard redesign
+- SIM Estate Overview with allocation progress and suspended/faulty/unassigned counts.
+- Connectivity & Machinery Allocation: provider distribution (real data from SIM snapshot), companies, machines, assigned/unassigned stock; explicit note that live telemetry is not collected.
+- Expiry & Renewal Intelligence: timeline, buckets, upcoming renewals, urgent expiry list.
+- Notification Centre with sent/failed/pending from real notification stats, enabled status and last scan.
+- SIM Inventory Snapshot compact table.
+- Recent Activity timeline.
+- Fully responsive stacked layout.
+
 ### Known follow-ups
 - Configure production SMTP.
 - Install Playwright browsers (`npx playwright install`).
 - Production deploy and seed.
 - Restore drill from backup.
+
 
