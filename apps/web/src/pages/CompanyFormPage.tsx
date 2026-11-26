@@ -8,6 +8,7 @@ import { apiRequest } from '@/lib/api';
 import { COUNTRIES, flagEmoji } from '@/lib/countries';
 import { INDIAN_STATES } from '@/lib/indian-states';
 import { PhoneField } from '@/components/ui/phone-field';
+import ReactCountryFlag from 'react-country-flag';
 import { PageHeader } from '@/components/ui/page-header';
 import { EmptyState } from '@/components/ui/feedback';
 import { Button } from '@/components/ui/button';
@@ -174,7 +175,10 @@ export function CompanyFormPage() {
                 <SelectContent>
                   {COUNTRIES.map((country) => (
                     <SelectItem key={country.iso} value={country.name}>
-                      {country.name}
+                      <span className="flex items-center gap-2">
+                        <ReactCountryFlag countryCode={country.iso} svg style={{ width: 20, height: 15 }} />
+                        <span>{country.name}</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

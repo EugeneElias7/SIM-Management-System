@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { COUNTRIES, findCountryByDialCode, flagEmoji } from '@/lib/countries';
+import { COUNTRIES, findCountryByDialCode } from '@/lib/countries';
 import { Input } from './input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import ReactCountryFlag from 'react-country-flag';
 import { cn } from '@/lib/utils';
 
 export interface PhoneFieldProps {
@@ -56,7 +57,7 @@ export function PhoneField({
         <SelectTrigger className="w-[118px] shrink-0">
           <SelectValue>
             <span className="flex items-center gap-1.5">
-              <span>{flagEmoji(country.iso)}</span>
+              <ReactCountryFlag countryCode={country.iso} svg style={{ width: 20, height: 15 }} />
               <span className="text-xs">+{country.dialCode}</span>
             </span>
           </SelectValue>
@@ -65,7 +66,7 @@ export function PhoneField({
           {COUNTRIES.map((item) => (
             <SelectItem key={item.iso} value={item.iso}>
               <span className="flex items-center gap-2">
-                <span>{flagEmoji(item.iso)}</span>
+                <ReactCountryFlag countryCode={item.iso} svg style={{ width: 20, height: 15 }} />
                 <span>{item.name}</span>
                 <span className="text-ink-500">+{item.dialCode}</span>
               </span>
