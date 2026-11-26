@@ -213,10 +213,10 @@ export function DashboardPage() {
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <EstateMetric label="Active" value={stats.activeSims} tone="primary" />
-                <EstateMetric label="Expiring" value={stats.expiringSoon} tone="warning" />
-                <EstateMetric label="Expired" value={stats.expiredSims} tone="danger" />
-                <EstateMetric label="In stock" value={stats.inStock} tone="muted" />
+                <EstateMetric label="Active" value={stats.activeSims} tone="primary" onClick={() => navigate('/sims?status=ACTIVE')} />
+                <EstateMetric label="Expiring" value={stats.expiringSoon} tone="warning" onClick={() => navigate('/sims?validity=EXPIRING_SOON')} />
+                <EstateMetric label="Expired" value={stats.expiredSims} tone="danger" onClick={() => navigate('/sims?validity=EXPIRED')} />
+                <EstateMetric label="In stock" value={stats.inStock} tone="muted" onClick={() => navigate('/sims?status=IN_STOCK')} />
               </div>
             </div>
             <div className="mt-6 grid grid-cols-3 gap-3">
@@ -509,7 +509,7 @@ export function DashboardPage() {
   );
 }
 
-function EstateMetric({ label, value, tone, compact }: { label: string; value: number; tone: 'primary' | 'warning' | 'danger' | 'muted'; compact?: boolean }) {
+function EstateMetric({ label, value, tone, compact, onClick }: { label: string; value: number; tone: 'primary' | 'warning' | 'danger' | 'muted'; compact?: boolean; onClick?: () => void }) {
   const toneClass = {
     primary: 'text-[#315F9D]',
     warning: 'text-[#B7791F]',
@@ -517,7 +517,7 @@ function EstateMetric({ label, value, tone, compact }: { label: string; value: n
     muted: 'text-[#788496]',
   }[tone];
   return (
-    <div className={`rounded-xl border border-[#E7EAF0] bg-[#FCFCFD] ${compact ? 'px-3 py-2' : 'px-4 py-3'}`}>
+    <div onClick={onClick} className={`rounded-xl border border-[#E7EAF0] bg-[#FCFCFD] ${compact ? 'px-3 py-2' : 'px-4 py-3'} ${onClick ? 'cursor-pointer transition hover:border-[#315F9D]/40' : ''}`}>
       <p className="text-[10px] font-semibold uppercase tracking-wide text-[#788496]">{label}</p>
       <p className={`mt-0.5 font-light tracking-tight text-[#202B3A] ${compact ? 'text-xl' : 'text-2xl'}`}>
         <span className={toneClass}>{value}</span>
