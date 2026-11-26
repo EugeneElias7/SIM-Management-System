@@ -32,8 +32,18 @@
 - Desktop/tablet/mobile layouts reviewed; no horizontal overflow.
 - Reduced-motion media query verified in CSS.
 
+
+### Dashboard redesign
+- Asymmetric 12-column grid: hero total SIMs card (5 cols), active (3), expiring (4).
+- Second row: companies, machines, notifications, last scan as MiniStat cards.
+- Charts: expiry timeline bar chart with vertical gradient + rounded corners; status distribution donut with center space, legend and tooltip.
+- Bottom row: upcoming expiries table (7 cols) + recent activity (5 cols).
+- Premium typography, generous spacing, soft shadows, restrained blue/semantic palette.
+- Fully responsive: stacks to single column on mobile.
+
 ### Known follow-ups
 - Configure production SMTP.
 - Install Playwright browsers (`npx playwright install`).
 - Production deploy and seed.
 - Restore drill from backup.
+
