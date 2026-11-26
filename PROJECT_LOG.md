@@ -60,11 +60,16 @@
 - No application references remain (build artifacts regenerated).
 - Tests: 11 API tests passed; typecheck and builds passed.
 
+
+### SIM lifecycle, bulk operations, activation and dashboard interactivity
+- Added receivedDate, companyAssignmentDate and ASSIGNED status.\n- One-year validity from activation date with leap-year handling.\n- Activate, suspend, mark faulty, set active actions.\n- Multi-select and bulk assign/archive/export on SIM inventory.\n- Removed machinery from active navigation workflow.\n- Dashboard metrics are clickable and navigate to filtered SIM lists.\n- Telegram adapter and test endpoint added; reminder default 3 days + on expiry.\n- Typecheck and tests passing.
+
 ### Known follow-ups
 - Configure production SMTP.
 - Install Playwright browsers (`npx playwright install`).
 - Production deploy and seed.
 - Restore drill from backup.
+
 
 
 
