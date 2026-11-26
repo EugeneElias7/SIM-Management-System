@@ -42,6 +42,9 @@ export function SimsPage() {
   const [companyId, setCompanyId] = React.useState('ALL');
   const [page, setPage] = React.useState(1);
   const [pageSize] = React.useState(20);
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const [bulkAssignOpen, setBulkAssignOpen] = React.useState(false);
+  const [bulkArchiveOpen, setBulkArchiveOpen] = React.useState(false);
   const [selectedSim, setSelectedSim] = React.useState<SimListItem | null>(null);
   const [assignOpen, setAssignOpen] = React.useState(false);
   const [unassignOpen, setUnassignOpen] = React.useState(false);
@@ -56,6 +59,7 @@ export function SimsPage() {
 
   React.useEffect(() => {
     setPage(1);
+    setSelected(new Set());
   }, [debouncedSearch, provider, validity, status, companyId]);
 
   const companiesQuery = useQuery({
@@ -198,6 +202,53 @@ export function SimsPage() {
         </div>
       </Card>
 
+      {selected.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-[#E7EAF0] bg-[#FCFCFD] px-4 py-3 shadow-sm">
+          <span className="text-sm font-medium text-[#202B3A]">{selected.size} selected</span>
+          <Button size="sm" variant="outline" onClick={() => setBulkAssignOpen(true)}>
+            Assign to company
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const selectedSims = items.filter((sim) => selected.has(sim.id));
+              const header = ['SIM ID','Mobile Number','Provider','Company','Machine','Expiry','Validity','Status'];
+              const rows = selectedSims.map((sim) => [
+                sim.internalId,
+                sim.mobileNumber,
+                sim.provider,
+                sim.company?.name ?? '',
+                sim.machine?.name ?? '',
+                sim.expiryDate ?? '',
+                sim.validityStatus,
+                sim.operationalStatus,
+              ]);
+              const csv = [header, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'san-solution-selected-sims.csv';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            Export selected
+          </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => setBulkArchiveOpen(true)}
+          >
+            Archive selected
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+            Clear
+          </Button>
+        </div>
+      )}
+
       <Card className="overflow-hidden">
         {simsQuery.isLoading ? (
           <div className="space-y-2 p-4">
@@ -223,6 +274,20 @@ export function SimsPage() {
               <table className="table">
                 <thead>
                   <tr>
+                    <th className="w-10">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-ink-300 text-[#315F9D]"
+                        checked={items.length > 0 && items.every((sim) => selected.has(sim.id))}
+                        onChange={(event) => {
+                          if (event.target.checked) {
+                            setSelected(new Set(items.map((sim) => sim.id)));
+                          } else {
+                            setSelected(new Set());
+                          }
+                        }}
+                      />
+                    </th>
                     <th>SIM</th>
                     <th>Provider</th>
                     <th>Company</th>
@@ -236,6 +301,21 @@ export function SimsPage() {
                 <tbody>
                   {items.map((sim) => (
                     <tr key={sim.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-ink-300 text-[#315F9D]"
+                          checked={selected.has(sim.id)}
+                          onChange={(event) => {
+                            setSelected((prev) => {
+                              const next = new Set(prev);
+                              if (event.target.checked) next.add(sim.id);
+                              else next.delete(sim.id);
+                              return next;
+                            });
+                          }}
+                        />
+                      </td>
                       <td>
                         <div className="font-medium text-ink-900">{sim.internalId}</div>
                         <div className="text-xs text-ink-500">{sim.mobileNumber}</div>
@@ -352,6 +432,24 @@ export function SimsPage() {
           if (selectedSim) archiveMutation.mutate(selectedSim.id);
         }}
         isPending={archiveMutation.isPending}
+      />
+      <BulkAssignDialog
+        open={bulkAssignOpen}
+        onOpenChange={setBulkAssignOpen}
+        selectedIds={Array.from(selected)}
+        onDone={() => {
+          queryClient.invalidateQueries({ queryKey: ['sims'] });
+          setSelected(new Set());
+        }}
+      />
+      <BulkArchiveDialog
+        open={bulkArchiveOpen}
+        onOpenChange={setBulkArchiveOpen}
+        selectedIds={Array.from(selected)}
+        onDone={() => {
+          queryClient.invalidateQueries({ queryKey: ['sims'] });
+          setSelected(new Set());
+        }}
       />
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} onDone={() => queryClient.invalidateQueries({ queryKey: ['sims'] })} />
     </div>
@@ -839,6 +937,152 @@ function ImportDialog({
           </Button>
           <Button onClick={submit} disabled={pending}>
             {pending ? 'Processingâ€¦' : dryRun ? 'Validate' : 'Import'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+
+function BulkAssignDialog({
+  open,
+  onOpenChange,
+  selectedIds,
+  onDone,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  selectedIds: string[];
+  onDone: () => void;
+}) {
+  const companiesQuery = useQuery({
+    queryKey: ['lookups', 'companies'],
+    queryFn: () => apiRequest<{ items: Array<{ id: string; name: string }> }>('/lookups/companies'),
+    enabled: open,
+  });
+  const [companyId, setCompanyId] = React.useState('');
+  const [notes, setNotes] = React.useState('');
+  const [pending, setPending] = React.useState(false);
+  const [result, setResult] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (open) {
+      setCompanyId('');
+      setNotes('');
+      setResult(null);
+    }
+  }, [open]);
+
+  const submit = async () => {
+    if (!companyId) return;
+    setPending(true);
+    setResult(null);
+    const outcomes = await Promise.allSettled(
+      selectedIds.map((id) =>
+        apiRequest(`/sims/${id}/assign`, {
+          method: 'POST',
+          body: JSON.stringify({ companyId, notes: notes || null }),
+        }),
+      ),
+    );
+    const ok = outcomes.filter((o) => o.status === 'fulfilled').length;
+    const fail = outcomes.length - ok;
+    setResult(`Assigned ${ok} of ${selectedIds.length} SIMs${fail ? ` (${fail} failed)` : ''}.`);
+    setPending(false);
+    if (ok > 0) onDone();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Bulk assign SIMs</DialogTitle>
+          <DialogDescription>Assign {selectedIds.length} selected SIMs to a company.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="label">Company</label>
+            <Select value={companyId} onValueChange={setCompanyId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select company" />
+              </SelectTrigger>
+              <SelectContent>
+                {(companiesQuery.data?.items ?? []).map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="label">Notes</label>
+            <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </div>
+          {result && <p className="text-sm text-[#202B3A]">{result}</p>}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          <Button onClick={submit} disabled={pending || !companyId}>
+            {pending ? 'Assigning…' : 'Assign'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BulkArchiveDialog({
+  open,
+  onOpenChange,
+  selectedIds,
+  onDone,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  selectedIds: string[];
+  onDone: () => void;
+}) {
+  const [pending, setPending] = React.useState(false);
+  const [result, setResult] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (open) setResult(null);
+  }, [open]);
+
+  const submit = async () => {
+    setPending(true);
+    setResult(null);
+    const outcomes = await Promise.allSettled(
+      selectedIds.map((id) => apiRequest(`/sims/${id}/archive`, { method: 'POST' })),
+    );
+    const ok = outcomes.filter((o) => o.status === 'fulfilled').length;
+    const fail = outcomes.length - ok;
+    setResult(`Archived ${ok} of ${selectedIds.length} SIMs${fail ? ` (${fail} failed)` : ''}.`);
+    setPending(false);
+    if (ok > 0) onDone();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Archive selected SIMs</DialogTitle>
+          <DialogDescription>
+            Archive {selectedIds.length} SIMs. Historical records are preserved.
+          </DialogDescription>
+        </DialogHeader>
+        {result && <p className="text-sm text-[#202B3A]">{result}</p>}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          <Button variant="danger" onClick={submit} disabled={pending}>
+            {pending ? 'Archiving…' : 'Archive'}
           </Button>
         </DialogFooter>
       </DialogContent>
