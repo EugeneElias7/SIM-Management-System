@@ -85,28 +85,22 @@ async function generateInternalId(tx: Tx): Promise<string> {
 
 async function validateDuplicates(
   db: Tx | typeof prisma,
-  input: { internalId?: string | null; mobileNumber: string; iccid: string; imsi?: string | null },
+  input: { internalId?: string | null; mobileNumber: string },
   excludeId?: string,
 ): Promise<void> {
   const normalized = {
     internalId: normalizeOptional(input.internalId),
     mobileNumber: input.mobileNumber.trim(),
-    iccid: input.iccid.trim(),
-    imsi: normalizeOptional(input.imsi),
   };
-  const or: Prisma.SimWhereInput[] = [
-    { mobileNumber: normalized.mobileNumber },
-    { iccid: normalized.iccid },
-  ];
+  const or: Prisma.SimWhereInput[] = [{ mobileNumber: normalized.mobileNumber }];
   if (normalized.internalId) or.push({ internalId: normalized.internalId });
-  if (normalized.imsi) or.push({ imsi: normalized.imsi });
 
   const existing = await db.sim.findMany({
     where: {
       OR: or,
       ...(excludeId ? { id: { not: excludeId } } : {}),
     },
-    select: { internalId: true, mobileNumber: true, iccid: true, imsi: true },
+    select: { internalId: true, mobileNumber: true },
   });
   if (existing.length === 0) return;
 
@@ -115,14 +109,8 @@ async function validateDuplicates(
     if (record.mobileNumber === normalized.mobileNumber) {
       fields.mobileNumber = ['This mobile number is already linked to another SIM.'];
     }
-    if (record.iccid === normalized.iccid) {
-      fields.iccid = ['This ICCID is already linked to another SIM.'];
-    }
     if (normalized.internalId && record.internalId === normalized.internalId) {
       fields.internalId = ['This internal SIM ID is already in use.'];
-    }
-    if (normalized.imsi && record.imsi === normalized.imsi) {
-      fields.imsi = ['This IMSI is already linked to another SIM.'];
     }
   }
   throw conflict('A SIM with these unique identifiers already exists.', fields);
@@ -256,8 +244,6 @@ export async function listSims(input: {
     where.OR = [
       { internalId: { contains: search, mode: 'insensitive' } },
       { mobileNumber: { contains: search, mode: 'insensitive' } },
-      { iccid: { contains: search, mode: 'insensitive' } },
-      { imsi: { contains: search, mode: 'insensitive' } },
       { company: { name: { contains: search, mode: 'insensitive' } } },
       { machine: { name: { contains: search, mode: 'insensitive' } } },
     ];
@@ -325,8 +311,6 @@ export async function createSim(input: SimFormInput, actor: ActorContext): Promi
   await validateDuplicates(prisma, {
     internalId: input.internalId,
     mobileNumber: input.mobileNumber,
-    iccid: input.iccid,
-    imsi: input.imsi,
   });
   await validateAssignmentTargets(prisma, companyId, machineId, contactId);
 
@@ -351,8 +335,6 @@ export async function createSim(input: SimFormInput, actor: ActorContext): Promi
       data: {
         internalId,
         mobileNumber: input.mobileNumber.trim(),
-        iccid: input.iccid.trim(),
-        imsi: normalizeOptional(input.imsi),
         provider: input.provider,
         activationDate: toDbDate(activationDate),
         expiryDate: toDbDate(expiryDate),
@@ -417,8 +399,6 @@ export async function updateSim(
     {
       internalId: input.internalId,
       mobileNumber: input.mobileNumber,
-      iccid: input.iccid,
-      imsi: input.imsi,
     },
     simId,
   );
@@ -478,8 +458,6 @@ export async function updateSim(
       data: {
         internalId: normalizeOptional(input.internalId) ?? existing.internalId,
         mobileNumber: input.mobileNumber.trim(),
-        iccid: input.iccid.trim(),
-        imsi: normalizeOptional(input.imsi),
         provider: input.provider,
         activationDate: toDbDate(activationDate),
         expiryDate: toDbDate(expiryDate),

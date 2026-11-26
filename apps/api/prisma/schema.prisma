@@ -197,8 +197,6 @@ model Sim {
   id                String            @id @default(uuid()) @db.Uuid
   internalId        String            @unique
   mobileNumber      String            @unique
-  iccid             String            @unique
-  imsi              String?           @unique
   provider          NetworkProvider
   activationDate    DateTime?         @db.Date
   expiryDate        DateTime?         @db.Date

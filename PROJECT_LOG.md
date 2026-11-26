@@ -51,10 +51,20 @@
 - Recent Activity timeline.
 - Fully responsive stacked layout.
 
+
+### ICCID and IMSI removal
+- Removed fields from Prisma schema, shared types/schemas, mappers, SIM service, import/export, reports, search, seed data and frontend.
+- Migration 20261126000000_remove_iccid_imsi drops iccid and imsi columns and their unique indexes without data loss.
+- Duplicate detection now uses mobile number and internal SIM ID only.
+- Import/export templates and preview updated.
+- No application references remain (build artifacts regenerated).
+- Tests: 11 API tests passed; typecheck and builds passed.
+
 ### Known follow-ups
 - Configure production SMTP.
 - Install Playwright browsers (`npx playwright install`).
 - Production deploy and seed.
 - Restore drill from backup.
+
 
 

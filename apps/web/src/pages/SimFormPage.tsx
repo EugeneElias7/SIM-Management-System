@@ -45,8 +45,6 @@ export function SimFormPage() {
     defaultValues: {
       internalId: '',
       mobileNumber: '',
-      iccid: '',
-      imsi: '',
       provider: 'AIRTEL',
       activationDate: '',
       expiryDate: '',
@@ -83,8 +81,6 @@ export function SimFormPage() {
       reset({
         internalId: sim.internalId ?? '',
         mobileNumber: sim.mobileNumber ?? '',
-        iccid: sim.iccid ?? '',
-        imsi: sim.imsi ?? '',
         provider: sim.provider,
         activationDate: sim.activationDate ?? '',
         expiryDate: sim.expiryDate ?? '',
@@ -102,7 +98,6 @@ export function SimFormPage() {
       const payload = {
         ...values,
         internalId: values.internalId || null,
-        imsi: values.imsi || null,
         activationDate: values.activationDate || null,
         expiryDate: values.expiryDate || null,
         companyId: values.companyId || null,
@@ -153,16 +148,6 @@ export function SimFormPage() {
               <Label htmlFor="mobileNumber">Mobile number</Label>
               <Input id="mobileNumber" {...register('mobileNumber')} placeholder="+919876543210" />
               {errors.mobileNumber && <p className="mt-1 text-xs text-red-600">{errors.mobileNumber.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="iccid">ICCID</Label>
-              <Input id="iccid" {...register('iccid')} />
-              {errors.iccid && <p className="mt-1 text-xs text-red-600">{errors.iccid.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="imsi">IMSI (optional)</Label>
-              <Input id="imsi" {...register('imsi')} />
-              {errors.imsi && <p className="mt-1 text-xs text-red-600">{errors.imsi.message}</p>}
             </div>
             <div>
               <Label htmlFor="provider">Provider</Label>

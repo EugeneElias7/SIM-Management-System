@@ -103,14 +103,6 @@ export const simFormSchema = z
       .string()
       .trim()
       .regex(/^\+?[0-9][0-9\s-]{8,16}$/, 'Enter a valid mobile number.'),
-    iccid: z
-      .string()
-      .trim()
-      .regex(/^[0-9A-Za-z]{18,22}$/, 'ICCID must contain 18–22 letters or digits.'),
-    imsi: z
-      .union([z.string().trim().regex(/^[0-9]{14,16}$/, 'IMSI must contain 14–16 digits.'), z.literal('')])
-      .optional()
-      .nullable(),
     provider: z.enum(NETWORK_PROVIDER_VALUES, { required_error: 'Select a network provider.' }),
     activationDate: optionalDateOnly,
     expiryDate: optionalDateOnly,

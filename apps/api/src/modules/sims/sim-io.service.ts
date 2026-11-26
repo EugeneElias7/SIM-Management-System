@@ -32,8 +32,6 @@ export interface SimExportFilters {
 const EXPORT_COLUMNS = [
   { key: 'internalId', label: 'SIM ID', width: 14 },
   { key: 'mobileNumber', label: 'Mobile Number', width: 18 },
-  { key: 'iccid', label: 'ICCID', width: 24 },
-  { key: 'imsi', label: 'IMSI', width: 20 },
   { key: 'provider', label: 'Provider', width: 12 },
   { key: 'company', label: 'Company', width: 30 },
   { key: 'machine', label: 'Machine', width: 24 },
@@ -49,8 +47,6 @@ const EXPORT_COLUMNS = [
 export const IMPORT_TEMPLATE_COLUMNS = [
   'SIM ID',
   'Mobile Number',
-  'ICCID',
-  'IMSI',
   'Provider',
   'Company',
   'Machine Serial',
@@ -65,7 +61,6 @@ const SAMPLE_ROW = [
   'SIM-1001',
   '+919800000001',
   '8991000000000000001',
-  '404010000000001',
   'Airtel',
   'Acme Manufacturing Pvt Ltd',
   'MC-1001',
@@ -86,8 +81,6 @@ function buildWhere(filters: SimExportFilters): Prisma.SimWhereInput {
     where.OR = [
       { internalId: { contains: filters.search, mode: 'insensitive' } },
       { mobileNumber: { contains: filters.search, mode: 'insensitive' } },
-      { iccid: { contains: filters.search, mode: 'insensitive' } },
-      { imsi: { contains: filters.search, mode: 'insensitive' } },
       { company: { name: { contains: filters.search, mode: 'insensitive' } } },
       { machine: { name: { contains: filters.search, mode: 'insensitive' } } },
     ];
@@ -120,8 +113,6 @@ async function loadExportRows(filters: SimExportFilters) {
     return {
       internalId: sim.internalId,
       mobileNumber: sim.mobileNumber,
-      iccid: sim.iccid,
-      imsi: sim.imsi ?? '',
       provider: NETWORK_PROVIDER_LABELS[sim.provider],
       company: sim.company?.name ?? '',
       machine: sim.machine?.name ?? '',
@@ -232,8 +223,6 @@ function canonicalHeader(value: string): string | null {
     mobilenumber: 'mobileNumber',
     mobile: 'mobileNumber',
     phonenumber: 'mobileNumber',
-    iccid: 'iccid',
-    imsi: 'imsi',
     provider: 'provider',
     network: 'provider',
     networkprovider: 'provider',
@@ -332,8 +321,8 @@ async function parseFile(
   if (matrix.length < 2) throw new Error('The file does not contain any data rows.');
   const headerRow = matrix[0]!;
   const mappings = headerRow.map((header) => canonicalHeader(header));
-  if (!mappings.includes('mobileNumber') || !mappings.includes('iccid')) {
-    throw new Error('The file must include "Mobile Number" and "ICCID" columns.');
+  if (!mappings.includes('mobileNumber')) {
+    throw new Error('The file must include a "Mobile Number" column.');
   }
 
   return matrix.slice(1).map((cells) => {
@@ -533,8 +522,6 @@ export async function importSims(options: {
     const input: SimFormInput = {
       internalId: record.internalId ?? null,
       mobileNumber: record.mobileNumber ?? '',
-      iccid: record.iccid ?? '',
-      imsi: record.imsi ?? null,
       provider,
       activationDate: normalizeImportDate(record.activationDate),
       expiryDate: normalizeImportDate(record.expiryDate),
@@ -553,13 +540,11 @@ export async function importSims(options: {
       }
     } else {
       const mobileKey = `m:${parsed.data.mobileNumber}`;
-      const iccidKey = `i:${parsed.data.iccid}`;
-      const duplicateRow = seen.get(mobileKey) ?? seen.get(iccidKey);
+      const duplicateRow = seen.get(mobileKey);
       if (duplicateRow) {
-        messages.push(`Duplicate mobile number or ICCID also used on row ${duplicateRow}.`);
+        messages.push(`Duplicate mobile number also used on row ${duplicateRow}.`);
       }
       seen.set(mobileKey, rowNumber);
-      seen.set(iccidKey, rowNumber);
     }
 
     if (messages.length > 0) {
@@ -575,7 +560,6 @@ export async function importSims(options: {
         row: rowNumber,
         internalId: validInput.internalId || '(auto)',
         mobileNumber: validInput.mobileNumber,
-        iccid: validInput.iccid,
         provider: validInput.provider,
         company: companyName ?? null,
         expiryDate: validInput.expiryDate ?? null,
@@ -602,12 +586,10 @@ export async function importSims(options: {
       where: {
         OR: [
           { mobileNumber: input.mobileNumber },
-          { iccid: input.iccid },
           ...(input.internalId ? [{ internalId: input.internalId }] : []),
-          ...(input.imsi ? [{ imsi: input.imsi }] : []),
         ],
       },
-      select: { mobileNumber: true, iccid: true, internalId: true, imsi: true },
+      select: { mobileNumber: true, internalId: true },
     });
     if (duplicates.length === 0) continue;
     const messages: string[] = [];
@@ -615,11 +597,9 @@ export async function importSims(options: {
       if (duplicate.mobileNumber === input.mobileNumber) {
         messages.push('Mobile number already exists.');
       }
-      if (duplicate.iccid === input.iccid) messages.push('ICCID already exists.');
       if (input.internalId && duplicate.internalId === input.internalId) {
         messages.push('SIM ID already exists.');
       }
-      if (input.imsi && duplicate.imsi === input.imsi) messages.push('IMSI already exists.');
     }
     dbIssues.push({ row: row.rowNumber, messages: [...new Set(messages)] });
   }

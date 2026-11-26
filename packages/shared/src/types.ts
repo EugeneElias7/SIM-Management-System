@@ -59,8 +59,6 @@ export interface SimListItem {
   id: string;
   internalId: string;
   mobileNumber: string;
-  iccid: string;
-  imsi: string | null;
   provider: NetworkProvider;
   activationDate: string | null;
   expiryDate: string | null;
@@ -125,7 +123,6 @@ export interface SimImportResult {
     row: number;
     internalId: string;
     mobileNumber: string;
-    iccid: string;
     provider: NetworkProvider;
     company: string | null;
     expiryDate: string | null;

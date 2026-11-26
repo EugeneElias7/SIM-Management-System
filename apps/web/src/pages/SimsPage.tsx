@@ -122,7 +122,7 @@ export function SimsPage() {
           <div className="relative xl:col-span-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
             <Input
-              placeholder="Search SIM ID, mobile, ICCID, company or machineâ€¦"
+              placeholder="Search SIM ID, mobile, company or machine…"
               className="pl-9"
               value={search}
               onChange={(event) => setSearch(event.target.value)}

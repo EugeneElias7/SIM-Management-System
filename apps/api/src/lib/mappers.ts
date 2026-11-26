@@ -46,8 +46,6 @@ export function mapSim(sim: SimWithRelations): SimListItem {
     id: sim.id,
     internalId: sim.internalId,
     mobileNumber: sim.mobileNumber,
-    iccid: sim.iccid,
-    imsi: sim.imsi,
     provider: sim.provider,
     activationDate: fromDbDate(sim.activationDate),
     expiryDate,

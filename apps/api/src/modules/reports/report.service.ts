@@ -41,8 +41,6 @@ const REPORT_META: Record<
     columns: [
       { key: 'internalId', label: 'SIM ID' },
       { key: 'mobileNumber', label: 'Mobile Number' },
-      { key: 'iccid', label: 'ICCID' },
-      { key: 'imsi', label: 'IMSI' },
       { key: 'provider', label: 'Provider' },
       { key: 'company', label: 'Company' },
       { key: 'machine', label: 'Machine' },
@@ -106,7 +104,6 @@ const REPORT_META: Record<
     columns: [
       { key: 'internalId', label: 'SIM ID' },
       { key: 'mobileNumber', label: 'Mobile Number' },
-      { key: 'iccid', label: 'ICCID' },
       { key: 'provider', label: 'Provider' },
       { key: 'company', label: 'Company' },
       { key: 'machine', label: 'Machine' },
@@ -136,8 +133,6 @@ function simWhere(filters: ReportFilters): Prisma.SimWhereInput {
     where.OR = [
       { internalId: { contains: search, mode: 'insensitive' } },
       { mobileNumber: { contains: search, mode: 'insensitive' } },
-      { iccid: { contains: search, mode: 'insensitive' } },
-      { imsi: { contains: search, mode: 'insensitive' } },
       { company: { name: { contains: search, mode: 'insensitive' } } },
       { machine: { name: { contains: search, mode: 'insensitive' } } },
     ];
@@ -216,8 +211,6 @@ async function buildInventoryReport(filters: ReportFilters): Promise<ReportData>
       return {
         internalId: sim.internalId,
         mobileNumber: sim.mobileNumber,
-        iccid: sim.iccid,
-        imsi: sim.imsi ?? '—',
         provider: providerLabel(sim.provider),
         company: sim.company?.name ?? '—',
         machine: sim.machine?.name ?? '—',

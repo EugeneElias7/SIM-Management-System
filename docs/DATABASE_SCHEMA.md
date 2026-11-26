@@ -18,7 +18,7 @@ Prisma migrations. All primary keys are UUIDs.
 ## Important constraints
 
 - Unique: `users.email`, `companies.name`, `machines.serialNumber`, `sims.internalId`,
-  `sims.mobileNumber`, `sims.iccid`, `sims.imsi`, `sessions.tokenHash`,
+  `sims.mobileNumber`, `sessions.tokenHash`,
   `password_reset_tokens.tokenHash`, `notifications.idempotencyKey`, `roles.name`.
 - Partial unique indexes (added in the initial migration):
   - one active `sim_assignment` per SIM (`WHERE "isActive" = true`)

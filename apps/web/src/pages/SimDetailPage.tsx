@@ -97,8 +97,6 @@ export function SimDetailPage() {
             <CardTitle>Overview</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
-            <Info label="ICCID" value={sim.iccid} />
-            <Info label="IMSI" value={sim.imsi ?? '—'} />
             <Info label="Provider" value={sim.provider} />
             <Info label="Activation date" value={humanDate(sim.activationDate)} />
             <Info label="Expiry date" value={humanDate(sim.expiryDate)} />

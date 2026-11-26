@@ -374,8 +374,6 @@ async function main() {
       data: {
         internalId,
         mobileNumber: `+9198000${String(10000 + index)}`,
-        iccid: `899100${String(1_000_000_000_000 + index)}`,
-        imsi: `40401${String(100_000_000 + index)}`,
         provider,
         activationDate: new Date(`${activationDate}T00:00:00.000Z`),
         expiryDate: new Date(`${expiryDate}T00:00:00.000Z`),
