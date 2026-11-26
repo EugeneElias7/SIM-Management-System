@@ -24,15 +24,24 @@ export function PhoneField({
 }: PhoneFieldProps) {
   const initialCountry =
     findCountryByDialCode(value ?? '') ?? COUNTRIES.find((country) => country.iso === defaultCountryIso) ?? COUNTRIES[0]!;
+  const initialNumber = value
+    ? value.startsWith(`+${initialCountry.dialCode}`)
+      ? value.slice(initialCountry.dialCode.length + 1).replace(/\D/g, '')
+      : value.replace(/\D/g, '')
+    : '';
+
   const [countryIso, setCountryIso] = React.useState(initialCountry.iso);
-  const [number, setNumber] = React.useState(
-    value ? value.replace(/^\+\d+\s*/, '').replace(/\D/g, '') : '',
-  );
+  const [number, setNumber] = React.useState(initialNumber);
 
   React.useEffect(() => {
     const detected = findCountryByDialCode(value ?? '');
     if (detected && detected.iso !== countryIso) setCountryIso(detected.iso);
-    const cleaned = value ? value.replace(/^\+\d+\s*/, '').replace(/\D/g, '') : '';
+    const selected = COUNTRIES.find((item) => item.iso === (detected?.iso ?? countryIso)) ?? COUNTRIES[0]!;
+    const cleaned = value
+      ? value.startsWith(`+${selected.dialCode}`)
+        ? value.slice(selected.dialCode.length + 1).replace(/\D/g, '')
+        : value.replace(/\D/g, '')
+      : '';
     if (cleaned !== number) setNumber(cleaned);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
