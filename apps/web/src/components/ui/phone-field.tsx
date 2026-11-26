@@ -91,6 +91,8 @@ export function PhoneField({
           emit(country.iso, next);
         }}
         placeholder={placeholder}
+        inputMode="numeric"
+        maxLength={15}
         className={error ? 'border-red-400' : ''}
       />
     </div>

@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Activity,
   BarChart3,
   Bell,
   Building2,
   ClipboardList,
-  Gauge,
   LayoutDashboard,
   Settings,
   Smartphone,
@@ -15,19 +14,54 @@ import {
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard:read' },
-  { to: '/sims', label: 'SIM Inventory', icon: Smartphone, permission: 'sims:read' },
-  { to: '/companies', label: 'Companies', icon: Building2, permission: 'companies:read' },
-  { to: '/machines', label: 'Machinery', icon: Wrench, permission: 'machines:read' },
-  { to: '/expiry', label: 'Expiry & Renewals', icon: ClipboardList, permission: 'renewals:read' },
-  { to: '/notifications', label: 'Notifications', icon: Bell, permission: 'notifications:read' },
-  { to: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports:read' },
-  { to: '/activity', label: 'Activity Log', icon: Activity, permission: 'activity:read' },
-  { to: '/settings', label: 'Settings', icon: Settings, permission: 'settings:manage' },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/sims', label: 'SIM Inventory', icon: Smartphone },
+  { to: '/companies', label: 'Companies', icon: Building2 },
+  { to: '/machines', label: 'Machinery', icon: Wrench },
+  { to: '/expiry', label: 'Expiry & Renewals', icon: ClipboardList },
+  { to: '/notifications', label: 'Notifications', icon: Bell },
+  { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/activity', label: 'Activity Log', icon: Activity },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
-export function Sidebar() {
+export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  return (
+    <nav className="flex-1 space-y-1 px-3 py-4">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const active =
+          item.to === '/'
+            ? location.pathname === '/'
+            : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={() => {
+              onNavigate?.();
+              navigate(item.to);
+            }}
+            className={cn(
+              'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+              active
+                ? 'bg-white/10 text-white shadow-sm'
+                : 'text-navy-100 hover:bg-white/5 hover:text-white',
+            )}
+          >
+            <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-white' : 'text-navy-200')} />
+            <span className="truncate">{item.label}</span>
+            {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-navy-300" />}
+          </NavLink>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function Sidebar() {
   const [logoError, setLogoError] = React.useState(false);
   return (
     <aside className="hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-white/10 bg-navy-900 text-white lg:flex">
@@ -50,31 +84,7 @@ export function Sidebar() {
         )}
         <p className="text-[11px] font-medium text-navy-200">SIM Management</p>
       </div>
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active =
-            item.to === '/'
-              ? location.pathname === '/'
-              : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={cn(
-                'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                active
-                  ? 'bg-white/10 text-white shadow-sm'
-                  : 'text-navy-100 hover:bg-white/5 hover:text-white',
-              )}
-            >
-              <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-white' : 'text-navy-200')} />
-              <span className="truncate">{item.label}</span>
-              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-navy-300" />}
-            </NavLink>
-          );
-        })}
-      </nav>
+      <SidebarNav />
       <div className="border-t border-white/10 px-5 py-4">
         <p className="text-[11px] text-navy-200">© {new Date().getFullYear()} SAN SOLUTION</p>
       </div>
