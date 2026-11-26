@@ -1,0 +1,1 @@
+ALTER TABLE "sims" ADD COLUMN IF NOT EXISTS "receivedDate" DATE;

@@ -375,6 +375,7 @@ async function main() {
         internalId,
         mobileNumber: `+9198000${String(10000 + index)}`,
         provider,
+        receivedDate: new Date(`${dateOffset(-30 + (index % 10))}T00:00:00.000Z`),
         activationDate: new Date(`${activationDate}T00:00:00.000Z`),
         expiryDate: new Date(`${expiryDate}T00:00:00.000Z`),
         operationalStatus,

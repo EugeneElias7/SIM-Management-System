@@ -342,7 +342,7 @@ export async function createSim(input: SimFormInput, actor: ActorContext): Promi
         internalId,
         mobileNumber: input.mobileNumber.trim(),
         provider: input.provider,
-        receivedDate: toDbDate(receivedDate),
+        receivedDate: toDbDate(receivedDate) ?? toDbDate(today()),
         activationDate: toDbDate(activationDate),
         expiryDate: toDbDate(expiryDate),
         operationalStatus: status,
