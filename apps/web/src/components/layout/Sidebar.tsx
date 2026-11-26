@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   Settings,
   Smartphone,
-  Wrench,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +16,6 @@ const navItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/sims', label: 'SIM Inventory', icon: Smartphone },
   { to: '/companies', label: 'Companies', icon: Building2 },
-  { to: '/machines', label: 'Machinery', icon: Wrench },
   { to: '/expiry', label: 'Expiry & Renewals', icon: ClipboardList },
   { to: '/notifications', label: 'Notifications', icon: Bell },
   { to: '/reports', label: 'Reports', icon: BarChart3 },
