@@ -21,6 +21,7 @@ enum NetworkProvider {
 
 enum OperationalStatus {
   IN_STOCK
+  ASSIGNED
   ACTIVE
   SUSPENDED
   FAULTY
@@ -51,6 +52,7 @@ enum NotificationStatus {
 
 enum NotificationChannel {
   EMAIL
+  TELEGRAM
 }
 
 model Role {
@@ -197,6 +199,7 @@ model Sim {
   id                String            @id @default(uuid()) @db.Uuid
   internalId        String            @unique
   mobileNumber      String            @unique
+  receivedDate      DateTime?         @db.Date
   provider          NetworkProvider
   activationDate    DateTime?         @db.Date
   expiryDate        DateTime?         @db.Date

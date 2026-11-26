@@ -43,6 +43,13 @@ notificationsRouter.get(
   controller.getEmailConfig,
 );
 notificationsRouter.post(
+  '/test-telegram',
+  requirePermission(PERMISSIONS.NOTIFICATIONS_MANAGE),
+  reportLimiter,
+  controller.testTelegram,
+);
+
+notificationsRouter.post(
   '/test-email',
   requirePermission(PERMISSIONS.NOTIFICATIONS_MANAGE),
   reportLimiter,

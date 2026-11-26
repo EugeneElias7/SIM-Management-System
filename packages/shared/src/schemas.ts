@@ -104,6 +104,7 @@ export const simFormSchema = z
       .trim()
       .regex(/^\+?[0-9][0-9\s-]{8,16}$/, 'Enter a valid mobile number.'),
     provider: z.enum(NETWORK_PROVIDER_VALUES, { required_error: 'Select a network provider.' }),
+    receivedDate: optionalDateOnly,
     activationDate: optionalDateOnly,
     expiryDate: optionalDateOnly,
     operationalStatus: z.enum(OPERATIONAL_STATUS_VALUES).default('IN_STOCK'),

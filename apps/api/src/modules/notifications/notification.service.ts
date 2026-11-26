@@ -14,6 +14,7 @@ import { mapNotification, type NotificationWithRelations } from '../../lib/mappe
 import { recordActivity } from '../../lib/audit.js';
 import type { ActorContext } from '../sims/sim.service.js';
 import { getEmailConfig, sendEmail } from '../../services/email/mailer.js';
+import { isTelegramConfigured, sendTelegramMessage } from '../../services/telegram.js';
 import { renderTestEmail } from '../../services/email/templates.js';
 import { env } from '../../config/env.js';
 import { getOrCreateNotificationSettings } from '../../jobs/expiry-scan.js';
@@ -270,6 +271,23 @@ export async function sendTestEmail(to: string, actor: ActorContext) {
     entityType: 'SYSTEM',
     description: `Test email sent to ${to}.`,
     metadata: { transport: result.transport },
+  });
+  return { messageId: result.messageId, transport: result.transport };
+}
+
+export async function sendTestTelegram(actor: ActorContext) {
+  if (!isTelegramConfigured()) {
+    throw serviceUnavailable('Telegram is not configured. Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID.');
+  }
+  const result = await sendTelegramMessage(
+    'SAN SOLUTION SIM Management — Telegram delivery test. If you received this, Telegram reminders are working.',
+  );
+  await recordActivity(prisma, {
+    ...actor,
+    action: 'TELEGRAM_TEST_SENT',
+    entityType: 'SYSTEM',
+    description: 'A test Telegram message was sent.',
+    metadata: { transport: result.transport, messageId: result.messageId },
   });
   return { messageId: result.messageId, transport: result.transport };
 }

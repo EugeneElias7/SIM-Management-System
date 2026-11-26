@@ -3,6 +3,7 @@ import utc from 'dayjs/plugin/utc.js';
 import timezonePlugin from 'dayjs/plugin/timezone.js';
 import {
   addDaysToDateOnly,
+  addYearsToDateOnly,
   dateOnlyFromDate,
   daysUntilDateOnly,
   parseDateOnlyUTC,
@@ -38,6 +39,10 @@ export function daysRemaining(expiryDate: string | null): number | null {
 
 export function addDays(dateOnly: string, days: number): string {
   return addDaysToDateOnly(dateOnly, days);
+}
+
+export function addYears(dateOnly: string, years: number): string {
+  return addYearsToDateOnly(dateOnly, years);
 }
 
 export function monthStart(dateOnly: string): string {

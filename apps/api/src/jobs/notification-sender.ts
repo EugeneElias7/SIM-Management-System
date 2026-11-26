@@ -6,6 +6,7 @@ import { sendEmail } from '../services/email/mailer.js';
 import { logger } from '../lib/logger.js';
 import { recordActivity } from '../lib/audit.js';
 import { env } from '../config/env.js';
+import { sendTelegramMessage, isTelegramConfigured } from '../services/telegram.js';
 
 export interface SendResult {
   status: 'sent' | 'skipped' | 'cancelled';
@@ -109,13 +110,20 @@ export async function deliverNotification(notificationId: string): Promise<SendR
   });
 
   try {
-    const result = await sendEmail({
-      to: notification.recipientEmail,
-      cc: notification.ccEmails,
-      subject: notification.subject || content.subject,
-      html: content.html,
-      text: content.text,
-    });
+    let result: { messageId: string; transport: 'smtp' | 'log' | 'telegram' };
+    if (notification.channel === 'TELEGRAM') {
+      const telegramResult = await sendTelegramMessage(content.text);
+      result = { messageId: telegramResult.messageId, transport: 'telegram' };
+    } else {
+      const emailResult = await sendEmail({
+        to: notification.recipientEmail,
+        cc: notification.ccEmails,
+        subject: notification.subject || content.subject,
+        html: content.html,
+        text: content.text,
+      });
+      result = emailResult;
+    }
 
     await prisma.notification.update({
       where: { id: notification.id },

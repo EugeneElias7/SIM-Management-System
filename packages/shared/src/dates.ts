@@ -54,6 +54,19 @@ export function daysUntilDateOnly(
   return Math.round((target - current) / 86_400_000);
 }
 
+export function addYearsToDateOnly(dateOnly: string, years: number): string {
+  if (!isValidDateOnly(dateOnly)) return dateOnly;
+  const [year, month, day] = dateOnly.split('-').map(Number);
+  if (year === undefined || month === undefined || day === undefined) return dateOnly;
+  let targetYear = year + years;
+  let targetDay = day;
+  if (month === 2 && day === 29) {
+    const isLeap = targetYear % 4 === 0 && (targetYear % 100 !== 0 || targetYear % 400 === 0);
+    if (!isLeap) targetDay = 28;
+  }
+  const candidate = `${targetYear}-${String(month).padStart(2, '0')}-${String(targetDay).padStart(2, '0')}`;
+  return isValidDateOnly(candidate) ? candidate : dateOnly;
+}
 export function addDaysToDateOnly(dateOnly: string, days: number): string {
   const parsed = parseDateOnlyUTC(dateOnly);
   if (!parsed) return dateOnly;

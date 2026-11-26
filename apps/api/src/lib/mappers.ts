@@ -18,7 +18,12 @@ function fullName(user: { firstName: string; lastName: string } | null | undefin
 }
 
 export type SimWithRelations = Prisma.SimGetPayload<{
-  include: { company: true; machine: true; contact: true };
+  include: {
+    company: true;
+    machine: true;
+    contact: true;
+    assignments: { where: { isActive: true }; take: 1; select: { assignedAt: true } };
+  };
 }>;
 
 export type SimDetailRecord = Prisma.SimGetPayload<{
@@ -47,8 +52,12 @@ export function mapSim(sim: SimWithRelations): SimListItem {
     internalId: sim.internalId,
     mobileNumber: sim.mobileNumber,
     provider: sim.provider,
+    receivedDate: fromDbDate(sim.receivedDate),
     activationDate: fromDbDate(sim.activationDate),
     expiryDate,
+    companyAssignmentDate: sim.assignments?.[0]?.assignedAt
+      ? sim.assignments[0].assignedAt.toISOString().slice(0, 10)
+      : null,
     operationalStatus: sim.operationalStatus,
     validityStatus: getValidityStatus(expiryDate, EXPIRY_WARNING_DAYS),
     daysRemaining: daysRemaining(expiryDate),

@@ -15,6 +15,7 @@ export const NETWORK_PROVIDER_LABELS: Record<NetworkProvider, string> = {
  */
 export const OPERATIONAL_STATUS_VALUES = [
   'IN_STOCK',
+  'ASSIGNED',
   'ACTIVE',
   'SUSPENDED',
   'FAULTY',
@@ -24,6 +25,7 @@ export type OperationalStatus = (typeof OPERATIONAL_STATUS_VALUES)[number];
 
 export const OPERATIONAL_STATUS_LABELS: Record<OperationalStatus, string> = {
   IN_STOCK: 'In Stock',
+  ASSIGNED: 'Assigned',
   ACTIVE: 'Active',
   SUSPENDED: 'Suspended',
   FAULTY: 'Faulty',

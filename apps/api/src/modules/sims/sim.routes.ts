@@ -114,6 +114,18 @@ simsRouter.post(
   controller.renew,
 );
 simsRouter.post(
+  '/:id/activate',
+  requirePermission(PERMISSIONS.SIMS_WRITE),
+  validate({ params: idParam, body: z.object({ activationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }) }),
+  controller.activate,
+);
+simsRouter.post(
+  '/:id/status',
+  requirePermission(PERMISSIONS.SIMS_WRITE),
+  validate({ params: idParam, body: z.object({ operationalStatus: z.enum(OPERATIONAL_STATUS_VALUES) }) }),
+  controller.updateStatus,
+);
+simsRouter.post(
   '/:id/archive',
   requirePermission(PERMISSIONS.SIMS_WRITE),
   validate({ params: idParam }),

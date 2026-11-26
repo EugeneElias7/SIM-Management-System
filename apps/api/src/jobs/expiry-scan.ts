@@ -88,7 +88,7 @@ export async function getOrCreateNotificationSettings(): Promise<NotificationSet
     create: {
       id: 'global',
       enabled: true,
-      reminderDaysBefore: [30, 15, 7],
+      reminderDaysBefore: [3],
       notifyOnExpiry: true,
       postExpiryWeekly: true,
       postExpiryIntervalDays: 7,
@@ -243,6 +243,61 @@ export async function runExpiryScan(options: ScanOptions = {}): Promise<ScanResu
             { err: error, notificationId: notification.id },
             'Notification created but could not be queued; it will be retried.',
           );
+        }
+
+        if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) {
+          const telegramKey = buildIdempotencyKey({
+            simId: sim.id,
+            expiryDate,
+            reminderType: candidate.reminderType,
+            reminderDays: candidate.reminderDays,
+            channel: 'TELEGRAM',
+          });
+          const existingTelegram = await prisma.notification.findUnique({
+            where: { idempotencyKey: telegramKey },
+            select: { id: true },
+          });
+          if (!existingTelegram) {
+            try {
+              const telegramNotification = await prisma.notification.create({
+                data: {
+                  simId: sim.id,
+                  channel: 'TELEGRAM',
+                  reminderType: candidate.reminderType,
+                  reminderDays: candidate.reminderDays,
+                  expiryCycle: sim.expiryDate!,
+                  idempotencyKey: telegramKey,
+                  recipientEmail: env.TELEGRAM_CHAT_ID,
+                  ccEmails: [],
+                  subject: emailContent.subject,
+                  status: 'PENDING',
+                  scheduledFor: now,
+                  maxAttempts: 5,
+                },
+              });
+              result.created += 1;
+              try {
+                const queued = await enqueue(telegramNotification.id);
+                if (queued) {
+                  await prisma.notification.update({
+                    where: { id: telegramNotification.id },
+                    data: { status: 'QUEUED' },
+                  });
+                }
+              } catch (error) {
+                logger.warn({ err: error, notificationId: telegramNotification.id }, 'Telegram notification created but could not be queued.');
+              }
+            } catch (error) {
+              if (typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'P2002') {
+                result.skippedExisting += 1;
+              } else {
+                result.failed += 1;
+                logger.error({ err: error, simId: sim.id }, 'Failed to create Telegram notification record');
+              }
+            }
+          } else {
+            result.skippedExisting += 1;
+          }
         }
       } catch (error) {
         if (

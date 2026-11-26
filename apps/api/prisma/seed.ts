@@ -227,7 +227,7 @@ async function main() {
     create: {
       id: 'global',
       enabled: true,
-      reminderDaysBefore: [30, 15, 7],
+      reminderDaysBefore: [3],
       notifyOnExpiry: true,
       postExpiryWeekly: true,
       postExpiryIntervalDays: 7,

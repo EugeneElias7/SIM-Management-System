@@ -22,6 +22,7 @@ export function SimDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [renewOpen, setRenewOpen] = React.useState(false);
+  const [activateOpen, setActivateOpen] = React.useState(false);
   const [assignOpen, setAssignOpen] = React.useState(false);
   const [archiveOpen, setArchiveOpen] = React.useState(false);
 
@@ -37,6 +38,15 @@ export function SimDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['sim', id] });
       queryClient.invalidateQueries({ queryKey: ['sims'] });
       setArchiveOpen(false);
+    },
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: (status: string) =>
+      apiRequest(`/sims/${id}/status`, { method: 'POST', body: JSON.stringify({ operationalStatus: status }) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sim', id] });
+      queryClient.invalidateQueries({ queryKey: ['sims'] });
     },
   });
 
@@ -61,14 +71,30 @@ export function SimDetailPage() {
             <Button variant="outline" onClick={() => navigate(`/sims/${id}/edit`)}>
               <Edit className="h-4 w-4" /> Edit
             </Button>
+            {!sim.activationDate && (
+              <Button variant="outline" onClick={() => setActivateOpen(true)}>
+                Activate
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setRenewOpen(true)}>
               <RefreshCw className="h-4 w-4" /> Renew
             </Button>
-            {sim.company ? (
-              <Button variant="outline" onClick={() => navigate(`/sims/${id}/edit`)}>
-                Reassign
+            {sim.operationalStatus !== 'SUSPENDED' && (
+              <Button variant="outline" onClick={() => statusMutation.mutate('SUSPENDED')}>
+                Suspend
               </Button>
-            ) : (
+            )}
+            {sim.operationalStatus !== 'FAULTY' && (
+              <Button variant="outline" onClick={() => statusMutation.mutate('FAULTY')}>
+                Mark faulty
+              </Button>
+            )}
+            {sim.operationalStatus !== 'ACTIVE' && sim.activationDate && (
+              <Button variant="outline" onClick={() => statusMutation.mutate('ACTIVE')}>
+                Set active
+              </Button>
+            )}
+            {!sim.company && (
               <Button variant="outline" onClick={() => setAssignOpen(true)}>
                 <UserPlus className="h-4 w-4" /> Assign
               </Button>
@@ -98,6 +124,8 @@ export function SimDetailPage() {
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <Info label="Provider" value={sim.provider} />
+            <Info label="Received date" value={humanDate(sim.receivedDate)} />
+            <Info label="Company assignment date" value={humanDate(sim.companyAssignmentDate)} />
             <Info label="Activation date" value={humanDate(sim.activationDate)} />
             <Info label="Expiry date" value={humanDate(sim.expiryDate)} />
             <Info label="Last renewed" value={sim.lastRenewedAt ? new Date(sim.lastRenewedAt).toLocaleDateString() : 'â€”'} />
@@ -250,6 +278,24 @@ export function SimDetailPage() {
       </Tabs>
 
       <RenewDialog sim={sim} open={renewOpen} onOpenChange={setRenewOpen} onDone={() => queryClient.invalidateQueries({ queryKey: ['sim', id] })} />
+      <Dialog open={activateOpen} onOpenChange={setActivateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Activate SIM</DialogTitle>
+            <DialogDescription>
+              {sim.internalId} — sets the plan validity to one year from the activation date.
+            </DialogDescription>
+          </DialogHeader>
+          <ActivateForm
+            simId={sim.id}
+            onDone={() => {
+              queryClient.invalidateQueries({ queryKey: ['sim', id] });
+              queryClient.invalidateQueries({ queryKey: ['sims'] });
+              setActivateOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
       <AssignDialog sim={sim} open={assignOpen} onOpenChange={setAssignOpen} onDone={() => queryClient.invalidateQueries({ queryKey: ['sim', id] })} />
       <Dialog open={archiveOpen} onOpenChange={setArchiveOpen}>
         <DialogContent>
@@ -517,6 +563,48 @@ function AssignDialog({ sim, open, onOpenChange, onDone }: { sim: any; open: boo
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+
+
+function ActivateForm({ simId, onDone }: { simId: string; onDone: () => void }) {
+  const [activationDate, setActivationDate] = React.useState(new Date().toISOString().slice(0, 10));
+  const [pending, setPending] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const submit = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      await apiRequest(`/sims/${simId}/activate`, {
+        method: 'POST',
+        body: JSON.stringify({ activationDate }),
+      });
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Activation failed.');
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label>Activation date</Label>
+        <Input type="date" value={activationDate} onChange={(e) => setActivationDate(e.target.value)} />
+      </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      <DialogFooter>
+        <Button variant="outline" onClick={() => onDone()}>
+          Cancel
+        </Button>
+        <Button onClick={submit} disabled={pending}>
+          {pending ? 'Activating…' : 'Activate'}
+        </Button>
+      </DialogFooter>
+    </div>
   );
 }
 

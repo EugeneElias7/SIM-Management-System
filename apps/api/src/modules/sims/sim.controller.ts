@@ -74,6 +74,16 @@ export const renew = asyncHandler(async (req: Request, res: Response) => {
   res.json({ sim });
 });
 
+export const activate = asyncHandler(async (req: Request, res: Response) => {
+  const sim = await simService.activateSim(req.params.id!, req.body.activationDate, actorFrom(req));
+  res.json({ sim });
+});
+
+export const updateStatus = asyncHandler(async (req: Request, res: Response) => {
+  const sim = await simService.updateSimStatus(req.params.id!, req.body.operationalStatus, actorFrom(req));
+  res.json({ sim });
+});
+
 export const archive = asyncHandler(async (req: Request, res: Response) => {
   await simService.archiveSim(req.params.id!, actorFrom(req));
   res.status(204).send();

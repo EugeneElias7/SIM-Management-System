@@ -33,6 +33,8 @@ export const env = {
   AUTH_EXPOSE_RESET_LINK: process.env.AUTH_EXPOSE_RESET_LINK === 'true',
   RATE_LIMIT_DISABLED: process.env.RATE_LIMIT_DISABLED === 'true',
   QUEUE_ENABLED: process.env.QUEUE_ENABLED !== 'false',
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ?? '',
+  TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID ?? '',
   // Daily at 09:00 India Standard Time. IST has no daylight saving.
   EXPIRY_SCAN_CRON: process.env.EXPIRY_SCAN_CRON ?? '0 9 * * *',
   EXPIRY_SCAN_TZ: process.env.EXPIRY_SCAN_TZ ?? 'Asia/Kolkata',

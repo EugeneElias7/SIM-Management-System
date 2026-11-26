@@ -39,7 +39,7 @@ export async function getDashboard(): Promise<DashboardData> {
           expiryDate: { gte: todayDate },
           operationalStatus: { not: 'DECOMMISSIONED' },
         },
-        include: { company: true, machine: true, contact: true },
+        include: { company: true, machine: true, contact: true, assignments: { where: { isActive: true }, take: 1, select: { assignedAt: true } } },
         orderBy: { expiryDate: 'asc' },
         take: 6,
       }),

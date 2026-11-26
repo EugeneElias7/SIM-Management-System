@@ -60,8 +60,10 @@ export interface SimListItem {
   internalId: string;
   mobileNumber: string;
   provider: NetworkProvider;
+  receivedDate: string | null;
   activationDate: string | null;
   expiryDate: string | null;
+  companyAssignmentDate: string | null;
   operationalStatus: OperationalStatus;
   validityStatus: ValidityStatus;
   daysRemaining: number | null;

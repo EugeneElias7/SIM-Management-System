@@ -48,6 +48,11 @@ export const getEmailConfig = asyncHandler(async (_req: Request, res: Response) 
   res.json({ config: service.emailConfig() });
 });
 
+export const testTelegram = asyncHandler(async (req: Request, res: Response) => {
+  const result = await service.sendTestTelegram(actorFrom(req));
+  res.json({ message: 'Test Telegram message sent.', ...result });
+});
+
 export const testEmail = asyncHandler(async (req: Request, res: Response) => {
   const input = z
     .object({ email: z.string().trim().toLowerCase().email() })

@@ -17,7 +17,7 @@ import {
   notFound,
   validationError,
 } from '../../lib/errors.js';
-import { addDays, daysRemaining, fromDbDate, toDbDate, today } from '../../lib/dates.js';
+import { addDays, addYears, daysRemaining, fromDbDate, toDbDate, today } from '../../lib/dates.js';
 import { getPagination, paginationMeta } from '../../lib/pagination.js';
 import {
   mapSim,
@@ -32,6 +32,11 @@ const simInclude = {
   company: true,
   machine: true,
   contact: true,
+  assignments: {
+    where: { isActive: true },
+    take: 1,
+    select: { assignedAt: true },
+  },
 } satisfies Prisma.SimInclude;
 
 const simDetailInclude = {
@@ -305,6 +310,7 @@ export async function createSim(input: SimFormInput, actor: ActorContext): Promi
   const companyId = normalizeOptional(input.companyId);
   const machineId = normalizeOptional(input.machineId);
   const contactId = normalizeOptional(input.contactId);
+  const receivedDate = normalizeOptional(input.receivedDate);
   const activationDate = normalizeOptional(input.activationDate);
   const expiryDate = normalizeOptional(input.expiryDate);
 
@@ -336,6 +342,7 @@ export async function createSim(input: SimFormInput, actor: ActorContext): Promi
         internalId,
         mobileNumber: input.mobileNumber.trim(),
         provider: input.provider,
+        receivedDate: toDbDate(receivedDate),
         activationDate: toDbDate(activationDate),
         expiryDate: toDbDate(expiryDate),
         operationalStatus: status,
@@ -391,6 +398,7 @@ export async function updateSim(
   const companyId = normalizeOptional(input.companyId);
   const machineId = normalizeOptional(input.machineId);
   const contactId = normalizeOptional(input.contactId);
+  const receivedDate = normalizeOptional(input.receivedDate);
   const activationDate = normalizeOptional(input.activationDate);
   const expiryDate = normalizeOptional(input.expiryDate);
 
@@ -459,6 +467,7 @@ export async function updateSim(
         internalId: normalizeOptional(input.internalId) ?? existing.internalId,
         mobileNumber: input.mobileNumber.trim(),
         provider: input.provider,
+        receivedDate: toDbDate(receivedDate),
         activationDate: toDbDate(activationDate),
         expiryDate: toDbDate(expiryDate),
         operationalStatus: status,
@@ -672,6 +681,82 @@ export async function renewSim(
         },
       }),
     );
+  });
+
+  return loadSimDetail(simId);
+}
+
+export async function activateSim(
+  simId: string,
+  activationDate: string,
+  actor: ActorContext,
+): Promise<SimDetail> {
+  const sim = await prisma.sim.findUnique({ where: { id: simId } });
+  if (!sim) throw notFound('SIM not found.');
+  if (sim.archivedAt) throw conflict('Archived SIMs cannot be activated.');
+  if (sim.operationalStatus === 'DECOMMISSIONED') {
+    throw conflict('Decommissioned SIMs cannot be activated.');
+  }
+
+  const oldExpiry = fromDbDate(sim.expiryDate);
+  const newExpiry = addYears(activationDate, 1);
+
+  await prisma.$transaction(async (tx) => {
+    if (oldExpiry && oldExpiry !== newExpiry) {
+      await cancelPendingNotifications(tx, simId, 'Cancelled because the SIM was activated.', sim.expiryDate);
+    }
+    await tx.sim.update({
+      where: { id: simId },
+      data: {
+        activationDate: toDbDate(activationDate),
+        expiryDate: toDbDate(newExpiry),
+        operationalStatus: 'ACTIVE',
+        updatedById: actor.userId,
+      },
+    });
+    await recordActivity(tx, auditFor(actor, {
+      companyId: sim.companyId,
+      simId,
+      action: 'SIM_ACTIVATED',
+      entityType: 'SIM',
+      entityId: simId,
+      description: `SIM ${sim.internalId} was activated on ${activationDate}; validity runs to ${newExpiry}.`,
+      metadata: { activationDate, expiryDate: newExpiry },
+    }));
+  });
+
+  return loadSimDetail(simId);
+}
+
+export async function updateSimStatus(
+  simId: string,
+  status: OperationalStatus,
+  actor: ActorContext,
+): Promise<SimDetail> {
+  const sim = await prisma.sim.findUnique({ where: { id: simId } });
+  if (!sim) throw notFound('SIM not found.');
+  if (sim.archivedAt) throw conflict('Archived SIMs cannot be updated.');
+
+  if (status === 'ACTIVE' && !sim.activationDate) {
+    throw validationError('Activate the SIM before marking it active.', {
+      operationalStatus: ['Set an activation date first.'],
+    });
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.sim.update({
+      where: { id: simId },
+      data: { operationalStatus: status, updatedById: actor.userId },
+    });
+    await recordActivity(tx, auditFor(actor, {
+      companyId: sim.companyId,
+      simId,
+      action: 'SIM_STATUS_CHANGED',
+      entityType: 'SIM',
+      entityId: simId,
+      description: `SIM ${sim.internalId} status changed to ${status}.`,
+      metadata: { previousStatus: sim.operationalStatus, status },
+    }));
   });
 
   return loadSimDetail(simId);

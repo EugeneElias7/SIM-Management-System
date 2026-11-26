@@ -46,6 +46,7 @@ export function SimFormPage() {
       internalId: '',
       mobileNumber: '',
       provider: 'AIRTEL',
+      receivedDate: '',
       activationDate: '',
       expiryDate: '',
       operationalStatus: 'IN_STOCK',
@@ -82,6 +83,7 @@ export function SimFormPage() {
         internalId: sim.internalId ?? '',
         mobileNumber: sim.mobileNumber ?? '',
         provider: sim.provider,
+        receivedDate: sim.receivedDate ?? '',
         activationDate: sim.activationDate ?? '',
         expiryDate: sim.expiryDate ?? '',
         operationalStatus: sim.operationalStatus,
@@ -186,6 +188,10 @@ export function SimFormPage() {
               </Select>
             </div>
             <div>
+              <Label htmlFor="receivedDate">Received date</Label>
+              <Input id="receivedDate" type="date" {...register('receivedDate')} />
+            </div>
+            <div>
               <Label htmlFor="activationDate">Activation date</Label>
               <Input id="activationDate" type="date" {...register('activationDate')} />
             </div>
@@ -217,26 +223,6 @@ export function SimFormPage() {
                   {(companiesQuery.data?.items ?? []).map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="machineId">Machine</Label>
-              <Select
-                value={watch('machineId') || ''}
-                onValueChange={(value) => setValue('machineId', value)}
-                disabled={!companyId}
-              >
-                <SelectTrigger id="machineId">
-                  <SelectValue placeholder="Select machine" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">No machine</SelectItem>
-                  {(machinesQuery.data?.items ?? []).map((machine) => (
-                    <SelectItem key={machine.id} value={machine.id} disabled={!machine.available && machine.id !== watch('machineId')}>
-                      {machine.name} ({machine.serialNumber})
                     </SelectItem>
                   ))}
                 </SelectContent>
