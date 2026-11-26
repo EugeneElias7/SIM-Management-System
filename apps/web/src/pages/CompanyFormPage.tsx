@@ -5,13 +5,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useParams } from 'react-router-dom';
 import { companyFormSchema, type CompanyFormInput } from '@san/shared';
 import { apiRequest } from '@/lib/api';
+import { COUNTRIES, flagEmoji } from '@/lib/countries';
+import { INDIAN_STATES } from '@/lib/indian-states';
+import { PhoneField } from '@/components/ui/phone-field';
 import { PageHeader } from '@/components/ui/page-header';
+import { EmptyState } from '@/components/ui/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { EmptyState } from '@/components/ui/feedback';
 import { Skeleton } from '@/components/ui/feedback';
 
 export function CompanyFormPage() {
@@ -29,6 +33,8 @@ export function CompanyFormPage() {
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<CompanyFormInput>({
@@ -136,7 +142,23 @@ export function CompanyFormPage() {
               </div>
               <div>
                 <Label htmlFor="state">State</Label>
-                <Input id="state" {...register('state')} />
+                 {watch('country') === 'India' ? (
+                   <Select value={watch('state') || ''} onValueChange={(value) => setValue('state', value)}>
+                     <SelectTrigger id="state">
+                       <SelectValue placeholder="Select state" />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="">No state</SelectItem>
+                       {INDIAN_STATES.map((state) => (
+                         <SelectItem key={state} value={state}>
+                           {state}
+                         </SelectItem>
+                       ))}
+                     </SelectContent>
+                   </Select>
+                 ) : (
+                   <Input id="state" {...register('state')} />
+                 )}
               </div>
             </div>
             <div>
@@ -145,11 +167,22 @@ export function CompanyFormPage() {
             </div>
             <div>
               <Label htmlFor="country">Country</Label>
-              <Input id="country" {...register('country')} />
+              <Select value={watch('country') || 'India'} onValueChange={(value) => setValue('country', value)}>
+                <SelectTrigger id="country">
+                  <SelectValue placeholder="Select country" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((country) => (
+                    <SelectItem key={country.iso} value={country.name}>
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" {...register('phone')} />
+              <PhoneField value={watch('phone')} onChange={(value) => setValue('phone', value)} error={errors.phone?.message} />
               {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>}
             </div>
             <div>
@@ -190,7 +223,7 @@ export function CompanyFormPage() {
             </div>
             <div>
               <Label htmlFor="contactPhone">Phone</Label>
-              <Input id="contactPhone" {...register('contactPhone')} />
+              <PhoneField value={watch('contactPhone')} onChange={(value) => setValue('contactPhone', value)} error={errors.contactPhone?.message} />
               {errors.contactPhone && <p className="mt-1 text-xs text-red-600">{errors.contactPhone.message}</p>}
             </div>
             <div>
